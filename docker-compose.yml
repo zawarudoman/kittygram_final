@@ -6,7 +6,7 @@ volumes:
   pg_data:
 
 services:
-  db:
+  postgres:
     image: postgres:13-alpine
     env_file:
       - .env
@@ -28,7 +28,7 @@ services:
     env_file:
       - .env
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
     command: >
       sh -c "python manage.py migrate &&
