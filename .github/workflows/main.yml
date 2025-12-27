@@ -129,7 +129,7 @@ jobs:
         username: ${{ secrets.SERVER_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        debug: true
+        #debug: true
         script: |
           cd ~/kittygram
           
