@@ -1,0 +1,64 @@
+version: '3.8'
+
+volumes:
+  kittygram_static_volume:
+  kittygram_media_volume:
+  kittygram_pg_data:
+
+services:
+  postgres:
+    image: postgres:13-alpine
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - kittygram_pg_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend:
+    image: zawarudoman/kittygram_backend:latest
+    restart: always
+    volumes:
+      - kittygram_static_volume:/app/static
+      - kittygram_media_volume:/app/media
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind 0.0.0.0:9000 kittygram_backend.wsgi"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DEBUG=False
+      - ALLOWED_HOSTS=backend,localhost,127.0.0.1,zawarudoman-kittygr.servebeer.com
+
+  frontend:
+    image: zawarudoman/kittygram_frontend:latest
+    restart: always
+    volumes:
+      - kittygram_static_volume:/app/static
+    command: cp -r /app/build/. /app/static/
+
+  gateway:
+    image: zawarudoman/kittygram_gateway:latest
+    restart: always
+    volumes:
+      - kittygram_static_volume:/staticfiles
+      - kittygram_media_volume:/app/media
+    ports:
+      - "9000:80"
+    depends_on:
+      - backend
+      - frontend
