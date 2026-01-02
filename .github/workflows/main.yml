@@ -60,7 +60,6 @@ jobs:
         cd backend/
         python manage.py test
 
-  # ДОБАВЛЯЕМ ЭТОТ БЛОК ДЛЯ СБОРКИ И ОТПРАВКИ ОБРАЗОВ
   build_and_push_to_docker_hub:
     runs-on: ubuntu-latest
     needs: tests
