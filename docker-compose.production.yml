@@ -27,7 +27,7 @@ services:
     image: zawarudoman/kittygram_backend:latest
     restart: always
     volumes:
-      - kittygram_static_volume:/app/static
+      - kittygram_static_volume:/app/collected_static
       - kittygram_media_volume:/app/media
     env_file:
       - .env
