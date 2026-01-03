@@ -19,15 +19,15 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-      interval: 30s
-      timeout: 10s
+      interval: 10s
+      timeout: 5s
       retries: 3
 
   backend:
     image: zawarudoman/kittygram_backend:latest
     restart: always
     volumes:
-      - kittygram_static_volume:/app/static
+      - kittygram_static_volume:/backend_static
       - kittygram_media_volume:/app/media
     env_file:
       - .env
@@ -36,7 +36,7 @@ services:
         condition: service_healthy
     command: >
       sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
+             python manage.py collectstatic
              gunicorn --bind 0.0.0.0:9000 kittygram_backend.wsgi"
     environment:
       - DB_HOST=postgres
